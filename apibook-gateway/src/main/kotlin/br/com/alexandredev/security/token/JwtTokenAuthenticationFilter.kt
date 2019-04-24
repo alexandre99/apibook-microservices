@@ -11,8 +11,12 @@ import java.util.Objects
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
+import org.slf4j.LoggerFactory
+import org.slf4j.Logger
 
 class JwtTokenAuthenticationFilter(private var jwtConfig: JwtConfig) : OncePerRequestFilter() {
+
+	private val log: Logger = LoggerFactory.getLogger(javaClass);
 
 	override fun doFilterInternal(
 		request: HttpServletRequest,
@@ -59,6 +63,7 @@ class JwtTokenAuthenticationFilter(private var jwtConfig: JwtConfig) : OncePerRe
 			}
 		} catch (e: Exception) {
 			// In case of failure. Make sure it's clear; so guarantee user won't be authenticated
+			log.error("User not found: ${e.message}")
 			SecurityContextHolder.clearContext();
 		}
 

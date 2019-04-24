@@ -3,7 +3,6 @@ package br.com.alexandredev.security.token
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
-import org.springframework.data.authentication.UserCredentials
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
@@ -20,6 +19,7 @@ import java.util.Date
 import java.time.LocalDateTime
 import java.time.Instant
 import java.util.TimeZone
+import br.com.alexandredev.domain.UserCredentials
 
 class JwtUsernameAndPasswordAuthenticationFilter(
 	var authManager: AuthenticationManager,
@@ -41,7 +41,7 @@ class JwtUsernameAndPasswordAuthenticationFilter(
 
 			// 2. Create auth object (contains credentials) which will be used by auth manager
 			val authToken: UsernamePasswordAuthenticationToken =
-				UsernamePasswordAuthenticationToken(creds.getUsername(), creds.getPassword(), Collections.emptyList())
+				UsernamePasswordAuthenticationToken(creds.userName, creds.password, Collections.emptyList())
 
 			// 3. Authentication manager authenticate the user, and use UserDetialsServiceImpl::loadUserByUsername() method to load the user.
 			return authManager.authenticate(authToken)

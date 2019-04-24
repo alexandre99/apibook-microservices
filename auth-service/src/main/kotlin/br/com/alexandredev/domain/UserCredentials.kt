@@ -4,5 +4,5 @@ class UserCredentials(
 	var userName: String?,
 	var password: String?
 ) {
-
+	constructor() : this("", "")
 }
