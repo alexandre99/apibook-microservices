@@ -22,12 +22,8 @@ class BookResource(private val bookService: BookService) {
 
 	@PostMapping
 	fun save(@Validated @RequestBody book: Book): ResponseEntity<Book> {
-		val bookReturn = this.bookService.save(book);
-
-		val uri: URI = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(bookReturn.id)
-			.toUri();
-
-		return ResponseEntity.created(uri).build();
+		this.bookService.save(book);
+		return ResponseEntity.status(HttpStatus.CREATED).build()
 	}
 
 	@PutMapping

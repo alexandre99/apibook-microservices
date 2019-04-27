@@ -19,7 +19,7 @@ class BookService(private var bookRepository: BookRepository) {
 		return this.bookRepository.save(book)
 	}
 
-	fun findById(id: String): Book {
+	fun findById(id: String): Book? {
 		return this.bookRepository.findById(id).orElse(null)
 	}
 

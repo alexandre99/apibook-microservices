@@ -11,7 +11,7 @@ class AuthorService(private var authorRepository: AuthorRepository) {
 		return this.authorRepository.save(author)
 	}
 
-	fun findById(id: String): Author {
+	fun findById(id: String): Author? {
 		return this.authorRepository.findById(id).orElse(null)
 	}
 
