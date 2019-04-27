@@ -4,7 +4,6 @@ import org.springframework.web.filter.OncePerRequestFilter
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import javax.servlet.FilterChain
-import br.com.alexandredev.security.JwtConfig
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import java.util.Objects
@@ -35,7 +34,7 @@ class JwtTokenAuthenticationFilter(private var jwtConfig: JwtConfig) : OncePerRe
 		// If there is no token provided and hence the user won't be authenticated.
 		// It's Ok. Maybe the user accessing a public path or asking for a token.
 
-		// All secured paths that needs a token are already defined and secured in config class.
+		// Al secured paths that needs a token are already defined and secured in config class.
 		// And If user tried to access without access token, then he won't be authenticated and an exception will be thrown.
 
 		// 3. Get the token

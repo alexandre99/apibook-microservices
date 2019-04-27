@@ -1,18 +1,20 @@
 package br.com.alexandredev.security
 
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.context.annotation.Bean
 import br.com.alexandredev.security.token.JwtConfig
-import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.http.SessionCreationPolicy
-import javax.servlet.http.HttpServletResponse
+import br.com.alexandredev.security.token.JwtTokenAuthenticationFilter
 import br.com.alexandredev.security.token.JwtUsernameAndPasswordAuthenticationFilter
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
+import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
+import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import javax.servlet.http.HttpServletResponse
 
 @EnableWebSecurity
 open class SecurityCredentialsConfig : WebSecurityConfigurerAdapter() {
@@ -37,9 +39,11 @@ open class SecurityCredentialsConfig : WebSecurityConfigurerAdapter() {
 			    // An object provided by WebSecurityConfigurerAdapter, used to authenticate the user passing user's credentials
 			    // The filter needs this auth manager to authenticate the user.
 			    .addFilter(JwtUsernameAndPasswordAuthenticationFilter(authenticationManager(), jwtConfig))
+				.addFilterAfter(JwtTokenAuthenticationFilter(jwtConfig), UsernamePasswordAuthenticationFilter::class.java)
 		    .authorizeRequests()
 			    // allow all POST requests
 			    .antMatchers(HttpMethod.POST, jwtConfig.uri).permitAll()
+//			    .antMatchers(HttpMethod.POST, "/auth/logout").permitAll()
 			    // any other requests must be authenticated
 			    .anyRequest().authenticated()
 	}
@@ -55,11 +59,5 @@ open class SecurityCredentialsConfig : WebSecurityConfigurerAdapter() {
 	open fun passwordEncoder(): BCryptPasswordEncoder {
 		return BCryptPasswordEncoder()
 	}
-
-	@Bean
-	open fun jwtConfig(): JwtConfig {
-        	return JwtConfig()
-	}
-
 
 }

@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Value
 
 class JwtConfig {
 
-	@Value("\${security.jwt.uri:/auth/**}")
+	@Value("\${security.jwt.uri:/auth/login}")
 	lateinit var uri: String
 
 	@Value("\${security.jwt.header:Authorization}")
@@ -13,7 +13,7 @@ class JwtConfig {
 	@Value("\${security.jwt.prefix:Bearer }")
 	lateinit var prefix: String
 
-	@Value("\${security.jwt.expiration:#{24*60*60}}")
+	@Value("\${security.jwt.expiration:#{180}}")
 	lateinit var expiration: Number
 
 	@Value("\${security.jwt.secret:JwtSecretKey}")
