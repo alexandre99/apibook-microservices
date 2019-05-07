@@ -1,0 +1,99 @@
+version: '3'
+services:
+  mongodb:
+    container_name: mongodb
+    image: mongo
+    ports:
+      - '12999:27017'
+    volumes:
+      - '/home/alexandredev/docker-volumes/apibooks-mongodb:/data/db'
+    networks: 
+      - apibook-network
+      
+  config:
+    container_name: configServer
+    build:
+      context: ./apibook-cloud-config-server
+      dockerfile: Dockerfile
+      args:
+        APPLICATION_NAME: apibook-config-server.jar
+        NUMBER_PORT: 8888
+    ports:
+      - '8888'
+    depends_on:
+      - mongodb
+    networks: 
+      apibook-network:
+        aliases:
+          - configServer
+
+  admin:
+    container_name: adminServer
+    build:
+      context: ./apibook-admin-server
+      dockerfile: Dockerfile
+      args:
+        APPLICATION_NAME: apibook-admin-server.jar
+        NUMBER_PORT: 9092
+    ports:
+      - '9092:9092'
+    depends_on:
+      - config
+    networks: 
+      apibook-network:
+        aliases:
+          - adminServer
+            
+  # discovery:
+  #   container_name: discoveryServer
+  #   build:
+  #     context: ./apibook-server-discovery
+  #     dockerfile: Dockerfile
+  #     args:
+  #       APPLICATION_NAME: apibook-discovery-server.jar
+  #       NUMBER_PORT: 8761
+  #   ports:
+  #     - '8761:8761'
+  #   depends_on:
+  #     - config
+  #   networks: 
+  #     apibook-network:
+  #       aliases:
+  #         - discoveryServer
+
+  # gateway:
+  #   container_name: gatewayServer
+  #   build:
+  #     context: ./apibook-gateway
+  #     dockerfile: Dockerfile
+  #     args:
+  #       APPLICATION_NAME: apibook-gateway-server.jar
+  #       NUMBER_PORT: 8762
+  #   ports:
+  #     - '8762:8762'
+  #   depends_on:
+  #     - config
+  #     - discovery
+  #   networks: 
+  #     - apibook-network
+
+  # auth:
+  #   container_name: authServer
+  #   build:
+  #     context: ./auth-service
+  #     dockerfile: Dockerfile
+  #     args:
+  #       APPLICATION_NAME: auth-service-server.jar
+  #       NUMBER_PORT: 8082
+  #   ports:
+  #     - '8082:8082'
+  #   depends_on:
+  #     - config
+  #     - discovery
+  #     - gateway
+  #   networks: 
+  #     - apibook-network      
+
+networks: 
+  apibook-network:
+      driver: bridge

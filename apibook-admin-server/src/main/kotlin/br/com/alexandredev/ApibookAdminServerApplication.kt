@@ -12,7 +12,7 @@ import de.codecentric.boot.admin.server.config.EnableAdminServer
 @SpringBootApplication
 open class ApibookAdminServerApplication(private val adminServerProperties: AdminServerProperties) {
 
-	private var adminContextPath: String
+	private lateinit var adminContextPath: String
 
 	init {
 		this.adminContextPath = adminServerProperties.getContextPath();
