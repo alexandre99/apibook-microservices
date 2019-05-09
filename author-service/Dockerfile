@@ -10,6 +10,9 @@ ENV DISCOVERY_SERVER_URL="http://discoveryServer:8761/eureka"
 ENV ADMIN_SERVER_URL="http://adminServer:9092"
 
 ADD target/${APPLICATION_NAME} app.jar
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+ADD wait /wait
+
+RUN chmod +x /wait
+CMD /wait && java -jar ./app.jar
 
 EXPOSE ${NUMBER_PORT}

@@ -5,6 +5,7 @@ services:
     image: mongo
     ports:
       - '12999:27017'
+    restart: on-failure  
     volumes:
       - '/home/alexandredev/docker-volumes/apibooks-mongodb:/data/db'
     networks: 
@@ -22,6 +23,7 @@ services:
       - '8888'
     depends_on:
       - mongodb
+    restart: on-failure  
     networks: 
       apibook-network:
         aliases:
@@ -39,60 +41,72 @@ services:
       - '9092:9092'
     depends_on:
       - config
+    environment:
+      WAIT_HOSTS: configServer:8888  
+    restart: on-failure  
     networks: 
       apibook-network:
         aliases:
           - adminServer
             
-  # discovery:
-  #   container_name: discoveryServer
-  #   build:
-  #     context: ./apibook-server-discovery
-  #     dockerfile: Dockerfile
-  #     args:
-  #       APPLICATION_NAME: apibook-discovery-server.jar
-  #       NUMBER_PORT: 8761
-  #   ports:
-  #     - '8761:8761'
-  #   depends_on:
-  #     - config
-  #   networks: 
-  #     apibook-network:
-  #       aliases:
-  #         - discoveryServer
+  discovery:
+    container_name: discoveryServer
+    build:
+      context: ./apibook-server-discovery
+      dockerfile: Dockerfile
+      args:
+        APPLICATION_NAME: apibook-discovery-server.jar
+        NUMBER_PORT: 8761
+    ports:
+      - '8761:8761'
+    environment:
+      WAIT_HOSTS: configServer:8888  
+    restart: on-failure  
+    depends_on:
+      - config
+    networks: 
+      apibook-network:
+        aliases:
+          - discoveryServer
 
-  # gateway:
-  #   container_name: gatewayServer
-  #   build:
-  #     context: ./apibook-gateway
-  #     dockerfile: Dockerfile
-  #     args:
-  #       APPLICATION_NAME: apibook-gateway-server.jar
-  #       NUMBER_PORT: 8762
-  #   ports:
-  #     - '8762:8762'
-  #   depends_on:
-  #     - config
-  #     - discovery
-  #   networks: 
-  #     - apibook-network
+  gateway:
+    container_name: gatewayServer
+    build:
+      context: ./apibook-gateway
+      dockerfile: Dockerfile
+      args:
+        APPLICATION_NAME: apibook-gateway-server.jar
+        NUMBER_PORT: 8762
+    ports:
+      - '8762:8762'
+    environment:
+      WAIT_HOSTS: configServer:8888,discoveryServer:8761
+    restart: on-failure  
+    depends_on:
+      - config
+      - discovery
+    networks: 
+      - apibook-network
 
-  # auth:
-  #   container_name: authServer
-  #   build:
-  #     context: ./auth-service
-  #     dockerfile: Dockerfile
-  #     args:
-  #       APPLICATION_NAME: auth-service-server.jar
-  #       NUMBER_PORT: 8082
-  #   ports:
-  #     - '8082:8082'
-  #   depends_on:
-  #     - config
-  #     - discovery
-  #     - gateway
-  #   networks: 
-  #     - apibook-network      
+  auth:
+    container_name: authServer
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+      args:
+        APPLICATION_NAME: auth-service-server.jar
+        NUMBER_PORT: 8082
+    ports:
+      - '8082'
+    environment:
+      WAIT_HOSTS: configServer:8888,discoveryServer:8761
+    restart: on-failure    
+    depends_on:
+      - config
+      - discovery
+      - gateway
+    networks: 
+      - apibook-network      
 
 networks: 
   apibook-network:

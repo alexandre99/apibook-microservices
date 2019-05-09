@@ -8,6 +8,9 @@ ENV PORT=${NUMBER_PORT}
 ENV CONFIG_SERVER_URL="http://configServer:8888"
 
 ADD target/${APPLICATION_NAME} app.jar
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+ADD wait /wait
+
+RUN chmod +x /wait
+CMD /wait && java -jar ./app.jar
 
 EXPOSE ${NUMBER_PORT}
