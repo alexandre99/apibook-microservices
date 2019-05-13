@@ -9,10 +9,13 @@ services:
     volumes:
       - '/home/alexandredev/docker-volumes/apibooks-mongodb:/data/db'
     networks: 
-      - apibook-network
+      apibook-network:
+        aliases:
+          - mongodb
       
   config:
     container_name: configServer
+    image: alexandredev/config:v1
     build:
       context: ./apibook-cloud-config-server
       dockerfile: Dockerfile
@@ -31,6 +34,7 @@ services:
 
   admin:
     container_name: adminServer
+    image: alexandredev/admin:v1
     build:
       context: ./apibook-admin-server
       dockerfile: Dockerfile
@@ -51,6 +55,7 @@ services:
             
   discovery:
     container_name: discoveryServer
+    image: alexandredev/discovery:v1
     build:
       context: ./apibook-server-discovery
       dockerfile: Dockerfile
@@ -71,6 +76,7 @@ services:
 
   gateway:
     container_name: gatewayServer
+    image: alexandredev/gateway:v1
     build:
       context: ./apibook-gateway
       dockerfile: Dockerfile
@@ -86,10 +92,13 @@ services:
       - config
       - discovery
     networks: 
-      - apibook-network
+      apibook-network:
+        aliases:
+          - gatewayServer
 
   auth:
     container_name: authServer
+    image: alexandredev/auth:v1
     build:
       context: ./auth-service
       dockerfile: Dockerfile
@@ -99,15 +108,65 @@ services:
     ports:
       - '8082'
     environment:
-      WAIT_HOSTS: configServer:8888,discoveryServer:8761
+      WAIT_HOSTS: configServer:8888,discoveryServer:8761,gatewayServer:8762
     restart: on-failure    
     depends_on:
       - config
       - discovery
       - gateway
     networks: 
-      - apibook-network      
+      apibook-network:
+        aliases:
+          - authServer
 
+  author:
+    container_name: authorServer
+    image: alexandredev/author:v1
+    build:
+      context: ./author-service
+      dockerfile: Dockerfile
+      args:
+        APPLICATION_NAME: author-service-server.jar
+        NUMBER_PORT: 8080
+    ports:
+      - '8080'
+    environment:
+      WAIT_HOSTS: configServer:8888,discoveryServer:8761,gatewayServer:8762
+    restart: on-failure    
+    depends_on:
+      - config
+      - discovery
+      - gateway
+      - mongodb
+    networks: 
+      apibook-network:
+        aliases:
+          - authorServer
+
+  book:
+    container_name: bookServer
+    image: alexandredev/book:v1
+    build:
+      context: ./book-service
+      dockerfile: Dockerfile
+      args:
+        APPLICATION_NAME: book-service-server.jar
+        NUMBER_PORT: 8081
+    ports:
+      - '8081'
+    environment:
+      WAIT_HOSTS: configServer:8888,discoveryServer:8761,gatewayServer:8762,mongodb:27017
+    restart: on-failure    
+    depends_on:
+      - config
+      - discovery
+      - gateway
+      - mongodb
+    networks: 
+      apibook-network:
+        aliases:
+          - authorServer
+                  
 networks: 
   apibook-network:
       driver: bridge
